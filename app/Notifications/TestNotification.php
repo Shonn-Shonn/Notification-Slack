@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -28,12 +29,23 @@ class TestNotification extends Notification
 
     public function toSlack($notifiable)
     {
-        $message = "Hello World";
+        $user = User::all();
+
+        $messageContent = "Fix service request by Users:\n";
+        $messageContent .= "```\n";
+        $messageContent .= "| Name         | Email                 |\n";
+        $messageContent .= "|--------------|-----------------------|\n";
+
+        foreach ($user as $u) {
+           $messageContent .= "| {$u->name} | {$u->email} |\n";
+        }
+
+        $messageContent .= "```\n";
 
         return (new SlackMessage)
         ->from('Ghost', ':ghost:')
         ->to('#project-for-notification')
-        ->content('Fix service request by '.$message);
+        ->content('Fix service request by '.$messageContent);
     }
     public function via(object $notifiable): array
     {
